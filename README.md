@@ -59,10 +59,11 @@ Check your GitHub repository in a web browser to confirm all files were uploaded
   git pull origin main --allow-unrelated-histories
   git push -u origin main
   ```
+  **Note:** The `--allow-unrelated-histories` flag merges two independent project histories. Use this only when you're sure you want to combine them, and be prepared to resolve any merge conflicts.
 
 **If you need to change the remote URL:**
 ```bash
-git remote set-url origin https://github.com/USERNAME/REPOSITORY.git
+git remote set-url origin https://github.com/USERNAME/REPOSITORY_NAME.git
 ```
 
 **To check which branch you're on:**
