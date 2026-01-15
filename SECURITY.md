@@ -119,6 +119,11 @@ pip install --upgrade -r requirements.txt
 pip freeze > requirements.txt
 ```
 
+### Known Vulnerabilities Fixed:
+- **Gunicorn < 22.0.0**: HTTP Request/Response Smuggling vulnerability (CVE) - Fixed by upgrading to v22.0.0
+  - Issue: Request smuggling leading to endpoint restriction bypass
+  - Resolution: Updated requirements.txt to gunicorn==22.0.0
+
 ### Automated Scanning:
 - GitHub Dependabot is recommended for automated dependency updates
 - Enable GitHub security scanning in repository settings
