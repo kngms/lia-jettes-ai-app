@@ -22,8 +22,10 @@ git commit -m "Initial upload of Lia-Jette AI App"
 
 If you haven't added a remote repository yet:
 ```bash
-git remote add origin https://github.com/kngms/lia--jette-s-ai-app-20260115T071224Z-3-001.git
+git remote add origin https://github.com/USERNAME/REPOSITORY_NAME.git
 ```
+
+Replace `USERNAME` with your GitHub username and `REPOSITORY_NAME` with your repository name.
 
 To verify the remote was added correctly:
 ```bash
