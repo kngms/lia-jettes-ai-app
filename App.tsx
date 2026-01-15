@@ -1,19 +1,20 @@
-
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth, signInWithGoogle, logoutUser } from './src/services/firebase';
+
 import WritingAssistant from './components/WritingAssistant';
 import ChatSearch from './components/ChatSearch';
 import ImageStudio from './components/ImageStudio';
-// PromptStudio is now embedded in Settings
 import { ExcelAssistant } from './components/ExcelAssistant';
 import KnowledgeBase from './components/KnowledgeBase';
 import AudioLab from './components/AudioLab';
 import RelationshipPlanner from './components/RelationshipPlanner';
 import Settings from './components/Settings';
 import LandingPage from './components/LandingPage';
-import { PenTool, MessageSquare, Image, Cpu, Brain, Mic2, Heart, Settings as SettingsIcon, Table, LogOut, Database, Book } from 'lucide-react';
+import { PenTool, MessageSquare, Image, Mic2, Heart, Settings as SettingsIcon, Table, LogOut, Book } from 'lucide-react';
 
-const Navigation = ({ isDyslexic, userName, onLogout }: { isDyslexic: boolean; userName: string; onLogout: () => void }) => {
+const Navigation = ({ isDyslexic, user, onLogout }: { isDyslexic: boolean; user: User; onLogout: () => void }) => {
   const location = useLocation();
   const navItems = [
     { path: '/', label: 'Assistant', icon: <PenTool size={20} /> },
@@ -34,6 +35,7 @@ const Navigation = ({ isDyslexic, userName, onLogout }: { isDyslexic: boolean; u
         </h1>
         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Personal Workspace</p>
       </div>
+
       <div className="flex flex-row md:flex-col gap-1 md:gap-4 w-full overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-hide">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -57,9 +59,18 @@ const Navigation = ({ isDyslexic, userName, onLogout }: { isDyslexic: boolean; u
       </div>
       
       <div className="hidden md:block mt-auto px-4">
-        <div className="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Active User</p>
-          <p className="text-xs font-bold text-slate-700 truncate">{userName}</p>
+        <div className="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3">
+            {user.photoURL ? (
+                <img src={user.photoURL} alt="User" className="w-8 h-8 rounded-full" />
+            ) : (
+                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                    {user.displayName?.[0] || 'U'}
+                </div>
+            )}
+            <div className="overflow-hidden">
+                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Active User</p>
+                <p className="text-xs font-bold text-slate-700 truncate">{user.displayName}</p>
+            </div>
         </div>
         <button 
           onClick={onLogout}
@@ -74,12 +85,17 @@ const Navigation = ({ isDyslexic, userName, onLogout }: { isDyslexic: boolean; u
 };
 
 const App: React.FC = () => {
-  const [isDyslexic, setIsDyslexic] = useState(() => {
-    return localStorage.getItem('dyslexicMode') === 'true';
-  });
-  const [user, setUser] = useState<string | null>(() => {
-    return localStorage.getItem('appUser');
-  });
+  const [isDyslexic, setIsDyslexic] = useState(() => localStorage.getItem('dyslexicMode') === 'true');
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('dyslexicMode', String(isDyslexic));
@@ -90,24 +106,28 @@ const App: React.FC = () => {
     }
   }, [isDyslexic]);
 
-  const handleLogin = (name: string) => {
-    setUser(name);
-    localStorage.setItem('appUser', name);
+  const handleLogin = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      alert("Login failed");
+    }
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('appUser');
+  const handleLogout = async () => {
+    await logoutUser();
   };
+
+  if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
 
   if (!user) {
-    return <LandingPage onLogin={handleLogin} />;
+    return <LandingPage onLogin={handleLogin} />; 
   }
 
   return (
     <HashRouter>
       <div className="flex flex-col md:flex-row min-h-screen">
-        <Navigation isDyslexic={isDyslexic} userName={user} onLogout={handleLogout} />
+        <Navigation isDyslexic={isDyslexic} user={user} onLogout={handleLogout} />
         
         <main className="flex-1 pb-20 md:pb-0 h-screen overflow-y-auto bg-slate-50/50">
           <div className="max-w-5xl mx-auto p-4 md:p-8">
