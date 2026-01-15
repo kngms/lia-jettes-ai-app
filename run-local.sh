@@ -28,10 +28,16 @@ pip install -q -r requirements.txt
 # Check for .env file
 if [ ! -f ".env" ]; then
     echo "⚠️  Warning: .env file not found"
-    echo "Creating from template..."
-    cp .env.example .env
-    echo "❗ Please edit .env and add your GEMINI_API_KEY"
-    exit 1
+    if [ -f ".env.example" ]; then
+        echo "Creating from template..."
+        cp .env.example .env
+        echo "❗ Please edit .env and add your GEMINI_API_KEY"
+        exit 1
+    else
+        echo "❌ Error: .env.example not found"
+        echo "Please create a .env file with your GEMINI_API_KEY"
+        exit 1
+    fi
 fi
 
 # Load environment variables
