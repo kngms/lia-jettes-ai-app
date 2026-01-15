@@ -136,6 +136,14 @@ export function bufferToWav(abuffer: AudioBuffer, len: number) {
 }
 
 export const textToSpeech = async (text: string, voiceName: 'Kore' | 'Puck' | 'Charon' | 'Fenrir' | 'Zephyr' = 'Kore') => {
+  // TTS requires direct API access with specific features not available in cloud function
+  if (USE_CLOUD_FUNCTION) {
+    throw new Error('Text-to-Speech requires direct API access. Please configure VITE_USE_CLOUD_FUNCTION=false for TTS features.');
+  }
+  if (!API_KEY) {
+    throw new Error('GEMINI_API_KEY not configured');
+  }
+  
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
@@ -392,6 +400,14 @@ export const generatePodcastScript = async (
 };
 
 export const synthesizeMultiSpeakerAudio = async (script: string, personas: Persona[]) => {
+  // TTS requires direct API access with specific features not available in cloud function
+  if (USE_CLOUD_FUNCTION) {
+    throw new Error('Multi-Speaker Audio requires direct API access. Please configure VITE_USE_CLOUD_FUNCTION=false for TTS features.');
+  }
+  if (!API_KEY) {
+    throw new Error('GEMINI_API_KEY not configured');
+  }
+  
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   
   const speakerVoiceConfigs = personas.map(p => ({

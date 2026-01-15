@@ -19,8 +19,17 @@ const getAuthToken = async (): Promise<string | null> => {
 const getCloudFunctionUrl = (): string => {
   // In production, this should be your deployed Cloud Function URL
   // Format: https://[REGION]-[PROJECT-ID].cloudfunctions.net/callGemini
-  return import.meta.env.VITE_CLOUD_FUNCTION_URL || 
-         'http://localhost:5001/[YOUR-PROJECT-ID]/us-central1/callGemini';
+  const url = import.meta.env.VITE_CLOUD_FUNCTION_URL;
+  
+  if (!url) {
+    throw new Error(
+      'VITE_CLOUD_FUNCTION_URL environment variable is not configured. ' +
+      'Please set it to your deployed Cloud Function URL (e.g., https://us-central1-your-project.cloudfunctions.net/callGemini) ' +
+      'or for local testing: http://localhost:5001/your-project-id/us-central1/callGemini'
+    );
+  }
+  
+  return url;
 };
 
 /**
